@@ -24,5 +24,5 @@ Notes:
 - More than five deletions, or more than 20% of managed pages, requires the
   `force_delete` override.
 
-Related: [Alpha Architecture Overview](overview.md),
-[retention policy](../policies/retention.md).
+Related: [Alpha Architecture Overview](../architecture/overview.md),
+[retention policy](retention.md).

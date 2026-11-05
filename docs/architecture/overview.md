@@ -31,5 +31,5 @@ moves never duplicate pages.
 
 ![Alpha example diagram](../assets/example.png)
 
-See also [Alpha Deployment Topology](deployment.md) or go back to
+See also [Alpha Deployment Topology](../policies/deployment.md) or go back to
 [Alpha Documentation Home](../index.md).

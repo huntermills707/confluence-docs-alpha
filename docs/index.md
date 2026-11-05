@@ -22,7 +22,7 @@ flowchart LR
 
 - The [Alpha User Guide](guide.md) explains day-to-day usage.
 - The [architecture overview](architecture/overview.md) describes the system.
-- Deployment options are covered in [Alpha Deployment Topology](architecture/deployment.md).
+- Deployment options are covered in [Alpha Deployment Topology](policies/deployment.md).
 - See the [retention policy](policies/retention.md) for data lifetimes.
 
 ## Example image
