@@ -604,12 +604,36 @@ class Converter:
 def desired_parent_key(entry, manifest: Manifest) -> str:
     """Identity of the parent page for an entry: a folder id or 'ROOT'."""
     folder_by_dir = {f["dir_path"]: fid for fid, f in manifest.folders.items()}
-    d = entry.get("dir_path") or entry["dir"]
+    # A folder's dir_path is itself; dir is its parent for both kinds.
+    d = entry["dir"]
     while d and d not in ("", posixpath.dirname(manifest.docs_rel)):
         if d in folder_by_dir:
             return folder_by_dir[d]
         d = posixpath.dirname(d)
     return "ROOT"
+
+
+def creation_order(creates):
+    """Return create operations ordered so every new parent precedes its children."""
+    by_id = {entry["id"]: (entry, parent_key) for entry, parent_key in creates}
+    ordered, done, visiting = [], set(), set()
+
+    def add(entry, parent_key):
+        identity = entry["id"]
+        if identity in done:
+            return
+        if identity in visiting:
+            raise SyncError(f"cyclic parent relationship involving {identity}")
+        visiting.add(identity)
+        if parent_key in by_id:
+            add(*by_id[parent_key])
+        visiting.remove(identity)
+        done.add(identity)
+        ordered.append((entry, parent_key))
+
+    for entry, parent_key in sorted(creates, key=lambda c: c[0]["source_path"]):
+        add(entry, parent_key)
+    return ordered
 
 
 def prop_value(repo: str, entry) -> dict:
@@ -834,8 +858,7 @@ def main():
     for identity, info in managed.items():
         page_id_of[identity] = info["pid"]  # existing pages keep their ids
 
-    for entry, parent_key in sorted(plan["creates"],
-                                    key=lambda c: c[0]["source_path"].count("/")):
+    for entry, parent_key in creation_order(plan["creates"]):
         parent_page_id = page_id_of.get(parent_key)
         if parent_page_id is None:
             raise SyncError(f"internal error: parent {parent_key} not available "
