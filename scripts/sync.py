@@ -885,6 +885,7 @@ def main():
 
     pages_now = {str(p["id"]): p for p in confluence.pages_in_space(space_id)
                  if p.get("status") == "current"}
+    updated_ids = {u[0]["id"] for u in plan["updates"]}
     for entry, cur, parent_key in plan["moves"]:
         pid = cur["pid"]
         desired_parent = page_id_of.get(parent_key)
@@ -895,6 +896,10 @@ def main():
             confluence.move_page(pid, desired_parent)
             stats["moved"] += 1
             say(f"moved page {pid} \"{entry['title']}\" under page {desired_parent}")
+        if (entry["id"] not in updated_ids
+                and cur["prop"].get("source_path") != entry["source_path"]):
+            confluence.set_property(pid, prop_value(repo, entry))
+            say(f"updated source_path metadata for page {pid}")
 
     # attachments of unchanged pages are reconciled too (cheap no-op normally)
     for identity, entry in manifest.entries.items():
