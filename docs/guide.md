@@ -63,3 +63,5 @@ Horizontal rules work too:
 ---
 
 Return to the [documentation home page](index.md).
+
+Merge-publication marker: scenario 3.
