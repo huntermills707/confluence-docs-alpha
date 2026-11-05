@@ -215,8 +215,10 @@ class Confluence:
     def set_property(self, page_id: str, value: dict):
         url = f"/wiki/rest/api/content/{page_id}/property/{PROP_KEY}"
         body = {"value": value}
-        if self.get_property(page_id) is None:
+        current = self.get_property(page_id)
+        if current is None:
             return self.post(url, body)
+        body["version"] = {"number": current["version"]["number"] + 1}
         return self.put(url, body)
 
     # -- attachments ---------------------------------------------------------
