@@ -1,0 +1,31 @@
+name: Validate docs (PR)
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "scripts/**"
+      - "requirements.txt"
+      - ".github/workflows/validate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # No secrets are used here: PR validation never publishes and never
+      # sees credentials.
+      - name: Validate front matter, links, images and Mermaid
+        run: python scripts/validate.py

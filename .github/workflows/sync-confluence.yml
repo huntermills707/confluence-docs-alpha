@@ -1,0 +1,57 @@
+name: Sync docs to Confluence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "scripts/**"
+      - "requirements.txt"
+      - ".github/workflows/sync-confluence.yml"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (report planned changes only)"
+        type: boolean
+        default: false
+      force_delete:
+        description: "Authorise large deletions (override mass-delete safeguard)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Never let two syncs race each other; queue instead of cancelling.
+concurrency:
+  group: confluence-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Render Mermaid diagrams
+        run: python scripts/render_mermaid.py
+
+      - name: Sync to Confluence
+        env:
+          ATLASSIAN_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}
+          ATLASSIAN_USER_EMAIL: ${{ secrets.ATLASSIAN_USER_EMAIL }}
+          ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
+          CONFLUENCE_SPACE_KEY: ${{ secrets.CONFLUENCE_SPACE_KEY }}
+          CONFLUENCE_ROOT_PAGE_ID: ${{ secrets.CONFLUENCE_ROOT_PAGE_ID }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run == true }}
+          FORCE_DELETE: ${{ inputs.force_delete == true }}
+        run: python scripts/sync.py
