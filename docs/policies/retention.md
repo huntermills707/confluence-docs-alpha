@@ -16,7 +16,8 @@ title: Data Retention Policy (Alpha)
 
 1. Only pages this repository published (tracked in its mark manifest) are
    ever trashed.
-2. The repository root page is never modified or deleted.
+2. The repository root page is never deleted; its body and title are never
+   changed. Only its manifest content properties are maintained.
 3. A run in which any document failed to publish removes nothing.
 
 Start from the [documentation home page](../index.md).

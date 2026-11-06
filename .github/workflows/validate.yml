@@ -25,7 +25,8 @@ jobs:
       # do not exist yet are reported as warnings, not failures.
       - name: Compile docs and check internal links (mark)
         env:
-          MARK_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}/wiki
+          # Scoped token: the secret is the full api.atlassian.com gateway URL.
+          MARK_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}
           MARK_USERNAME: ${{ secrets.ATLASSIAN_USER_EMAIL }}
           MARK_PASSWORD: ${{ secrets.ATLASSIAN_API_TOKEN }}
           MARK_FILES: docs/**/*.md

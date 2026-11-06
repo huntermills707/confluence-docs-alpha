@@ -36,7 +36,8 @@ jobs:
 
       - name: Publish docs to Confluence (mark)
         env:
-          MARK_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}/wiki
+          # Scoped token: the secret is the full api.atlassian.com gateway URL.
+          MARK_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}
           MARK_USERNAME: ${{ secrets.ATLASSIAN_USER_EMAIL }}
           MARK_PASSWORD: ${{ secrets.ATLASSIAN_API_TOKEN }}
           MARK_SPACE: ${{ secrets.CONFLUENCE_SPACE_KEY }}
@@ -51,6 +52,8 @@ jobs:
           # Remember file -> page mappings in this repository's own manifest so
           # renames/retitles update pages and removed files' pages are trashed.
           MARK_TRACK_PAGES: "true"
+          # Scoped tokens cannot write space properties; use root-page properties.
+          MARK_MANIFEST_PAGE: ${{ secrets.CONFLUENCE_ROOT_PAGE_ID }}
           MARK_MANIFEST_PREFIX: alpha.sync
           MARK_ON_ORPHAN: delete
           MARK_ORPHAN_UNDER: ${{ secrets.CONFLUENCE_ROOT_PAGE_ID }}
@@ -67,7 +70,8 @@ jobs:
             -v "$PWD:/docs" \
             -e MARK_BASE_URL -e MARK_USERNAME -e MARK_PASSWORD -e MARK_SPACE \
             -e MARK_FILES -e MARK_PARENTS -e MARK_PARENTS_FROM_PATH \
-            -e MARK_FEATURES -e MARK_TRACK_PAGES -e MARK_MANIFEST_PREFIX \
+            -e MARK_FEATURES -e MARK_TRACK_PAGES -e MARK_MANIFEST_PAGE \
+            -e MARK_MANIFEST_PREFIX \
             -e MARK_ON_ORPHAN -e MARK_ORPHAN_UNDER -e MARK_CHANGES_ONLY \
             -e MARK_MINOR_EDIT -e MARK_OUTPUT_FORMAT \
             "${EXTRA[@]}" \

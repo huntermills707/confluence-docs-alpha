@@ -30,9 +30,9 @@ docs/**/*.md  (YAML front matter with title)
   `index.md` uses that file as the folder's page (title and body).
 * Relative links between documents become Confluence page links; images are
   uploaded as attachments automatically.
-* `mark --track-pages` keeps a file → page manifest **in Confluence**
-  (prefix `alpha.sync`), so renamed files and retitled documents update the
-  existing page instead of creating a second one.
+* `mark --track-pages` keeps a file → page manifest in **content properties
+  on this repository's root page** (prefix `alpha.sync`), so renamed files and
+  retitled documents update the existing page instead of creating a second one.
 * Files deleted from the repository have their pages moved to the **trash**
   (`--on-orphan delete`), scoped to pages beneath this repository's root
   page. A run in which any document failed to publish removes nothing, and
@@ -44,14 +44,14 @@ Settings → Secrets and variables → Actions:
 
 | Secret | Example |
 |---|---|
-| `ATLASSIAN_BASE_URL` | `https://jaegermolino.atlassian.net` |
+| `ATLASSIAN_BASE_URL` | `https://api.atlassian.com/ex/confluence/CLOUD-ID` |
 | `ATLASSIAN_USER_EMAIL` | you@example.com |
-| `ATLASSIAN_API_TOKEN` | Atlassian Cloud API token |
+| `ATLASSIAN_API_TOKEN` | Scoped Atlassian Cloud API token |
 | `CONFLUENCE_SPACE_KEY` | `GHConfDocs` |
 | `CONFLUENCE_ROOT_PAGE_ID` | page id of *this repo's* root page |
 
-The root page was created once by hand and is only ever used as the parent of
-this repository's pages — mark never writes to it or deletes it.
+The root page was created once by hand. Mark stores manifest content properties
+on it but never changes its body or title and never deletes it.
 
 ## Workflows
 

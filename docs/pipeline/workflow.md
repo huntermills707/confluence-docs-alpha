@@ -42,9 +42,10 @@ On each run `mark publish`:
 1. Discovers `docs/**/*.md` and reads each file's front matter title.
 2. Derives the page tree from the directory structure
    (`--parents-from-path`) under this repository's root page in the space.
-3. Matches pages by **title**; the page manifest it keeps in Confluence
-   (`--track-pages --manifest-prefix alpha.sync`) maps each file to its
-   page so renames and retitles update pages in place.
+3. Matches pages by **title**; the page manifest it keeps in root-page
+   content properties (`--track-pages --manifest-page <root-id>
+   --manifest-prefix alpha.sync`) maps each file to its page so renames and
+   retitles update pages in place.
 4. Converts Markdown to Confluence storage format; renders Mermaid blocks
    to PNG images and uploads them, plus any referenced images, as page
    attachments.

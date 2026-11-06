@@ -15,9 +15,9 @@ title: "Pipeline: Limitations and Roadmap (Alpha)"
   with any failure removes nothing, pages with children outside the
   removal are untouched, and everything goes to recoverable trash. Use
   the workflow's `dry_run` input to preview large refactors first.
-- **Space-admin requirement.** The page manifest lives in space
-  properties, so the token user must be a space admin (or the workflows
-  move to `--manifest-page`, which needs only page-edit rights).
+- **Root-page edit permission.** The page manifest lives in content
+  properties on this repository's root page, so the publishing identity
+  must be able to edit that page. Its body and title are not changed.
 - **One-way sync.** Manual edits made directly in Confluence are
   overwritten by the next publish. `--no-overwrite` exists but is not
   enabled.
@@ -32,15 +32,15 @@ title: "Pipeline: Limitations and Roadmap (Alpha)"
   by hand.
 - **Publisher pinned to mark v16.25.0.** v17 is a major release with
   breaking changes (admonition syntax, stricter configuration, CLI
-  reorganisation) — upgrading is deliberate work, not a tag bump.
+  reorganisation) — upgrading is deliberate work, not a tag bump; see
+  `MARK-V17-NOTES.md` at the PoC root for the analysis and upgrade path.
 
 ## Potential improvements
 
 - Enable `--no-overwrite` so hand-edited pages are flagged instead of
   silently reverted (works with the already-enabled page manifest).
-- Move to a **scoped API token** via the `api.atlassian.com` gateway plus
-  `--manifest-page` for least-privilege publishing (see
-  [secrets and permissions](setup.md)).
+- Use a separate read-only scoped token for PR validation so those jobs do
+  not receive publishing credentials (see [secrets and permissions](setup.md)).
 - Pin the Docker image **by digest** rather than tag for supply-chain
   hardening.
 - Extend the PR gate with `--check-links confluence` (and `external`,
