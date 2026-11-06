@@ -59,8 +59,8 @@ this repository's pages — mark never writes to it or deletes it.
   lands on `main` touching `docs/`, plus manual runs with a `dry_run` input.
 * **Validate docs (PR)** — runs on pull requests: `mark publish
   --compile-only --check-links internal` renders every page (Mermaid
-  included) and fails on broken internal links. It receives no Confluence
-  credentials and never publishes.
+  included) and fails on broken internal links. It never publishes;
+  resolving links between documents performs read-only Confluence lookups.
 
 Both workflows pin the same mark image tag (`env.MARK_IMAGE`); change the two
 pins together to upgrade or roll back the publisher.

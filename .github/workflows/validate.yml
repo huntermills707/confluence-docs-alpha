@@ -18,11 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # PR validation never receives Confluence credentials and never
-      # publishes: --compile-only renders every page (Mermaid included) and
-      # fails on internal links that do not resolve to a document with a title.
+      # PR validation never publishes (--compile-only): mark compiles every
+      # page (Mermaid included) and checks internal links. Resolving a
+      # relative link to another document performs a read-only Confluence
+      # page lookup, so read credentials are required; links to pages that
+      # do not exist yet are reported as warnings, not failures.
       - name: Compile docs and check internal links (mark)
         env:
+          MARK_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}/wiki
+          MARK_USERNAME: ${{ secrets.ATLASSIAN_USER_EMAIL }}
+          MARK_PASSWORD: ${{ secrets.ATLASSIAN_API_TOKEN }}
           MARK_FILES: docs/**/*.md
           # The space key is already public in this repository's docs.
           MARK_SPACE: GHConfDocs
@@ -34,6 +39,7 @@ jobs:
         run: |
           docker run --rm \
             -v "$PWD:/docs" \
+            -e MARK_BASE_URL -e MARK_USERNAME -e MARK_PASSWORD \
             -e MARK_FILES -e MARK_SPACE -e MARK_PARENTS_FROM_PATH \
             -e MARK_FEATURES -e MARK_CHECK_LINKS -e MARK_COMPILE_ONLY \
             -e MARK_OUTPUT_FORMAT \
