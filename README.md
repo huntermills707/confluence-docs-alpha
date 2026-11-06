@@ -67,10 +67,8 @@ Settings → Secrets and variables → Actions:
 The root page is created once (manually or via the API) and is never deleted
 or modified by the sync.
 
-Because the tool repository is private, configure
-`CONFLUENCE_DOCS_SYNC_SSH_KEY` as the private key of a read-only deploy key on
-`confluence-docs-sync`. Use a distinct key pair for this content repository.
-This credential is separate from the Confluence credentials.
+The tool repository is public and is checked out with ordinary read-only
+access; no tool-specific credential is required.
 
 ## Workflows
 
@@ -84,7 +82,8 @@ This credential is separate from the Confluence credentials.
   targets, image references, Markdown conversion and Mermaid rendering. It
   receives no Confluence secrets and never publishes.
 
-Both workflows check out `confluence-docs-sync` at `v1.0.0` into
+Both workflows check out `confluence-docs-sync` `v1.0.1` by its full commit SHA
+(`4062818615e929bbcb069c20d7961348bc1c6306`) into
 `.confluence-docs-sync/` and pass this content workspace explicitly through
 `--repo-root`. Upgrade or roll back the engine by changing the two workflow
 pins together; never copy tool scripts into this repository. See the tool's
