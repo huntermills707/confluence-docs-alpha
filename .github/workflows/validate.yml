@@ -19,9 +19,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: huntermills707/confluence-docs-sync
-          ref: v1.0.0
+          ref: 4062818615e929bbcb069c20d7961348bc1c6306
           path: .confluence-docs-sync
-          ssh-key: ${{ secrets.CONFLUENCE_DOCS_SYNC_SSH_KEY }}
           persist-credentials: false
 
       - uses: actions/setup-python@v5
