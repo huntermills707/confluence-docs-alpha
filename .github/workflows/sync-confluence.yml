@@ -5,8 +5,6 @@ on:
     branches: [main]
     paths:
       - "docs/**"
-      - "scripts/**"
-      - "requirements.txt"
       - ".github/workflows/sync-confluence.yml"
   workflow_dispatch:
     inputs:
@@ -15,7 +13,7 @@ on:
         type: boolean
         default: false
       force_delete:
-        description: "Authorise large deletions (override mass-delete safeguard)"
+        description: "Authorise large deletions (override mass-deletion safeguard)"
         type: boolean
         default: false
 
@@ -33,16 +31,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check out pinned confluence-docs-sync release
+        uses: actions/checkout@v4
+        with:
+          repository: huntermills707/confluence-docs-sync
+          ref: v1.0.0
+          path: .confluence-docs-sync
+          ssh-key: ${{ secrets.CONFLUENCE_DOCS_SYNC_SSH_KEY }}
+          persist-credentials: false
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
           cache: pip
+          cache-dependency-path: .confluence-docs-sync/requirements.txt
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install tool dependencies
+        run: pip install -r .confluence-docs-sync/requirements.txt
 
       - name: Render Mermaid diagrams
-        run: python scripts/render_mermaid.py
+        run: python .confluence-docs-sync/scripts/render_mermaid.py --repo-root "${{ github.workspace }}"
 
       - name: Sync to Confluence
         env:
@@ -54,4 +62,4 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           DRY_RUN: ${{ inputs.dry_run == true }}
           FORCE_DELETE: ${{ inputs.force_delete == true }}
-        run: python scripts/sync.py
+        run: python .confluence-docs-sync/scripts/sync.py --repo-root "${{ github.workspace }}"

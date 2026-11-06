@@ -7,6 +7,9 @@ repository's own root page in the `GHConfDocs` Confluence space.
 
 The twin repository `confluence-docs-beta` publishes into the same space under
 a different root page. The two can never see or delete each other's pages.
+Both are content-only consumers of the canonical
+[`confluence-docs-sync`](https://github.com/huntermills707/confluence-docs-sync)
+tool, pinned to the same immutable release.
 
 ## How it works
 
@@ -64,17 +67,28 @@ Settings → Secrets and variables → Actions:
 The root page is created once (manually or via the API) and is never deleted
 or modified by the sync.
 
+Because the tool repository is private, configure
+`CONFLUENCE_DOCS_SYNC_SSH_KEY` as the private key of a read-only deploy key on
+`confluence-docs-sync`. Use a distinct key pair for this content repository.
+This credential is separate from the Confluence credentials.
+
 ## Workflows
 
-* **Sync docs to Confluence** — runs on pushes to `main` that touch `docs/`,
-  `scripts/`, `requirements.txt` or the workflow itself, plus manual runs
-  (`workflow_dispatch`) with two inputs:
+* **Sync docs to Confluence** — runs on pushes to `main` that touch `docs/`
+  or the workflow itself, plus manual runs (`workflow_dispatch`) with two
+  inputs:
   * `dry_run` — print the reconciliation plan without touching Confluence.
   * `force_delete` — authorise a deletion batch larger than the safeguard
     limits (see below).
 * **Validate docs (PR)** — runs on pull requests; checks front matter, link
   targets, image references, Markdown conversion and Mermaid rendering. It
-  uses no secrets and never publishes.
+  receives no Confluence secrets and never publishes.
+
+Both workflows check out `confluence-docs-sync` at `v1.0.0` into
+`.confluence-docs-sync/` and pass this content workspace explicitly through
+`--repo-root`. Upgrade or roll back the engine by changing the two workflow
+pins together; never copy tool scripts into this repository. See the tool's
+`RELEASING.md` for the complete process.
 
 ## Reconciliation guarantees
 
@@ -133,16 +147,16 @@ docs/
 ├── guide.md                  formatting sample
 ├── architecture/
 │   ├── _index.md             folder page with stable identity
-│   ├── overview.md
-│   └── deployment.md
+│   └── overview.md
 ├── policies/
-│   ├── _index.md
+│   ├── _index.md             folder page with stable identity
+│   ├── deployment.md
 │   └── retention.md
 └── assets/
     └── example.png
 
-scripts/
-├── sync.py                   reconciliation engine
-├── render_mermaid.py         mermaid → SVG renderer (CI)
-└── validate.py               PR validation (no secrets)
+.github/workflows/            thin pinned-tool consumers
 ```
+
+The canonical scripts, dependencies, tests, and release documentation live only
+in `confluence-docs-sync`.
