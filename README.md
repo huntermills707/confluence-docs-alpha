@@ -87,6 +87,12 @@ docs/
 │   ├── index.md              folder page for policies/
 │   ├── deployment.md
 │   └── retention.md
+├── pipeline/
+│   ├── index.md              folder page for pipeline/
+│   ├── workflow.md           how the sync workflows run
+│   ├── authoring.md          how to format documents
+│   ├── setup.md              secrets and permissions
+│   └── limitations.md        known limits and improvements
 └── assets/
     └── example.png
 
