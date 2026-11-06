@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: huntermills707/confluence-docs-sync
-          ref: 6d5e2d38a5388f07b7725ccb0e40e3aee0703690
+          ref: 4062818615e929bbcb069c20d7961348bc1c6306
           path: .confluence-docs-sync
           persist-credentials: false
 

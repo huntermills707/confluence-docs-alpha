@@ -82,8 +82,8 @@ access; no tool-specific credential is required.
   targets, image references, Markdown conversion and Mermaid rendering. It
   receives no Confluence secrets and never publishes.
 
-Both workflows check out `confluence-docs-sync` `v1.0.0` by its full commit SHA
-(`6d5e2d38a5388f07b7725ccb0e40e3aee0703690`) into
+Both workflows check out `confluence-docs-sync` `v1.0.1` by its full commit SHA
+(`4062818615e929bbcb069c20d7961348bc1c6306`) into
 `.confluence-docs-sync/` and pass this content workspace explicitly through
 `--repo-root`. Upgrade or roll back the engine by changing the two workflow
 pins together; never copy tool scripts into this repository. See the tool's
