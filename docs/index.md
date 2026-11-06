@@ -1,5 +1,4 @@
 ---
-doc_id: 98905d42-47e7-4633-beec-c2649cae354b
 title: Alpha Documentation Home
 ---
 

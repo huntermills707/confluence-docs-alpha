@@ -1,5 +1,4 @@
 ---
-doc_id: 941d35ea-e724-48c6-acf9-f0487ab2604f
 title: Data Retention Policy (Alpha)
 ---
 
@@ -15,8 +14,10 @@ title: Data Retention Policy (Alpha)
 
 ## Deletion safeguards
 
-1. Only pages managed by this repository are ever trashed.
-2. The repository root page is never deleted.
-3. Mass deletions are blocked unless explicitly authorised.
+1. Only pages this repository published (tracked in its mark manifest) are
+   ever trashed.
+2. The repository root page is never deleted; its body and title are never
+   changed. Only its manifest content properties are maintained.
+3. A run in which any document failed to publish removes nothing.
 
 Start from the [documentation home page](../index.md).

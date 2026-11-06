@@ -9,29 +9,39 @@ on:
 permissions:
   contents: read
 
+env:
+  MARK_IMAGE: kovetskiy/mark:v16.25.0
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check out pinned confluence-docs-sync release
-        uses: actions/checkout@v4
-        with:
-          repository: huntermills707/confluence-docs-sync
-          ref: 4062818615e929bbcb069c20d7961348bc1c6306
-          path: .confluence-docs-sync
-          persist-credentials: false
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
-          cache-dependency-path: .confluence-docs-sync/requirements.txt
-
-      - name: Install tool dependencies
-        run: pip install -r .confluence-docs-sync/requirements.txt
-
-      # PR validation never receives Confluence credentials or publishes.
-      - name: Validate front matter, links, images and Mermaid
-        run: python .confluence-docs-sync/scripts/validate.py --repo-root "${{ github.workspace }}"
+      # PR validation never publishes (--compile-only): mark compiles every
+      # page (Mermaid included) and checks internal links. Resolving a
+      # relative link to another document performs a read-only Confluence
+      # page lookup, so read credentials are required; links to pages that
+      # do not exist yet are reported as warnings, not failures.
+      - name: Compile docs and check internal links (mark)
+        env:
+          # Scoped token: the secret is the full api.atlassian.com gateway URL.
+          MARK_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}
+          MARK_USERNAME: ${{ secrets.ATLASSIAN_USER_EMAIL }}
+          MARK_PASSWORD: ${{ secrets.ATLASSIAN_API_TOKEN }}
+          MARK_FILES: docs/**/*.md
+          # The space key is already public in this repository's docs.
+          MARK_SPACE: GHConfDocs
+          MARK_PARENTS_FROM_PATH: "true"
+          MARK_FEATURES: mermaid,frontmatter
+          MARK_CHECK_LINKS: internal
+          MARK_COMPILE_ONLY: "true"
+          MARK_OUTPUT_FORMAT: github
+        run: |
+          docker run --rm \
+            -v "$PWD:/docs" \
+            -e MARK_BASE_URL -e MARK_USERNAME -e MARK_PASSWORD \
+            -e MARK_FILES -e MARK_SPACE -e MARK_PARENTS_FROM_PATH \
+            -e MARK_FEATURES -e MARK_CHECK_LINKS -e MARK_COMPILE_ONLY \
+            -e MARK_OUTPUT_FORMAT \
+            "$MARK_IMAGE" mark publish

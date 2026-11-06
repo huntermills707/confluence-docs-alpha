@@ -1,5 +1,4 @@
 ---
-doc_id: efc2c9f7-e709-4c58-af34-92600c1cd8ed
 title: Alpha Architecture Overview
 ---
 
@@ -23,9 +22,10 @@ flowchart TB
 
 ## Identity model
 
-Every document carries a `doc_id` in its front matter. The synchronizer
-stores that id as a content property on the Confluence page, so renames and
-moves never duplicate pages.
+Pages are published by [mark](https://github.com/kovetskiy/mark), which
+matches pages by title in the space and remembers which file published each
+page in a manifest stored in Confluence (`--track-pages`), so file renames
+and retitles update the existing page instead of creating duplicates.
 
 ## Image attachment
 

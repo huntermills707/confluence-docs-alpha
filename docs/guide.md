@@ -1,5 +1,4 @@
 ---
-doc_id: d4fb3e1f-262b-421a-bcc6-ce793f0fb6a8
 title: Alpha User Guide
 ---
 
