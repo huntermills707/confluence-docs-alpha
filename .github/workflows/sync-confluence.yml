@@ -1,5 +1,7 @@
 name: Sync docs to Confluence
 
+# A merged pull request to main lands here as a push to main, which is what
+# triggers the publish. Manual runs are available with a dry-run option.
 on:
   push:
     branches: [main]
@@ -9,11 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run (report planned changes only)"
-        type: boolean
-        default: false
-      force_delete:
-        description: "Authorise large deletions (override mass-deletion safeguard)"
+        description: "Dry run (report what would change, publish nothing)"
         type: boolean
         default: false
 
@@ -25,40 +23,52 @@ concurrency:
   group: confluence-sync
   cancel-in-progress: false
 
+env:
+  # Pinned publisher. The image bundles headless Chrome for Mermaid rendering.
+  # Upgrade/roll back by changing this tag. https://github.com/kovetskiy/mark
+  MARK_IMAGE: kovetskiy/mark:v16.25.0
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check out pinned confluence-docs-sync release
-        uses: actions/checkout@v4
-        with:
-          repository: huntermills707/confluence-docs-sync
-          ref: 4062818615e929bbcb069c20d7961348bc1c6306
-          path: .confluence-docs-sync
-          persist-credentials: false
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
-          cache-dependency-path: .confluence-docs-sync/requirements.txt
-
-      - name: Install tool dependencies
-        run: pip install -r .confluence-docs-sync/requirements.txt
-
-      - name: Render Mermaid diagrams
-        run: python .confluence-docs-sync/scripts/render_mermaid.py --repo-root "${{ github.workspace }}"
-
-      - name: Sync to Confluence
+      - name: Publish docs to Confluence (mark)
         env:
-          ATLASSIAN_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}
-          ATLASSIAN_USER_EMAIL: ${{ secrets.ATLASSIAN_USER_EMAIL }}
-          ATLASSIAN_API_TOKEN: ${{ secrets.ATLASSIAN_API_TOKEN }}
-          CONFLUENCE_SPACE_KEY: ${{ secrets.CONFLUENCE_SPACE_KEY }}
-          CONFLUENCE_ROOT_PAGE_ID: ${{ secrets.CONFLUENCE_ROOT_PAGE_ID }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          DRY_RUN: ${{ inputs.dry_run == true }}
-          FORCE_DELETE: ${{ inputs.force_delete == true }}
-        run: python .confluence-docs-sync/scripts/sync.py --repo-root "${{ github.workspace }}"
+          MARK_BASE_URL: ${{ secrets.ATLASSIAN_BASE_URL }}/wiki
+          MARK_USERNAME: ${{ secrets.ATLASSIAN_USER_EMAIL }}
+          MARK_PASSWORD: ${{ secrets.ATLASSIAN_API_TOKEN }}
+          MARK_SPACE: ${{ secrets.CONFLUENCE_SPACE_KEY }}
+          MARK_FILES: docs/**/*.md
+          # Everything publishes beneath this repository's existing root page.
+          MARK_PARENTS: confluence-docs-alpha (sync root)
+          # Mirror the docs/ directory tree as the page tree; docs/index.md is
+          # the page for docs/ itself, each directory's index.md its folder page.
+          MARK_PARENTS_FROM_PATH: "true"
+          # Read YAML front matter titles; render mermaid blocks.
+          MARK_FEATURES: mermaid,frontmatter
+          # Remember file -> page mappings in this repository's own manifest so
+          # renames/retitles update pages and removed files' pages are trashed.
+          MARK_TRACK_PAGES: "true"
+          MARK_MANIFEST_PREFIX: alpha.sync
+          MARK_ON_ORPHAN: delete
+          MARK_ORPHAN_UNDER: ${{ secrets.CONFLUENCE_ROOT_PAGE_ID }}
+          # Skip unchanged pages; don't notify watchers on updates.
+          MARK_CHANGES_ONLY: "true"
+          MARK_MINOR_EDIT: "true"
+          MARK_OUTPUT_FORMAT: github
+        run: |
+          EXTRA=()
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            EXTRA=(-e MARK_DRY_RUN=true)
+          fi
+          docker run --rm \
+            -v "$PWD:/docs" \
+            -e MARK_BASE_URL -e MARK_USERNAME -e MARK_PASSWORD -e MARK_SPACE \
+            -e MARK_FILES -e MARK_PARENTS -e MARK_PARENTS_FROM_PATH \
+            -e MARK_FEATURES -e MARK_TRACK_PAGES -e MARK_MANIFEST_PREFIX \
+            -e MARK_ON_ORPHAN -e MARK_ORPHAN_UNDER -e MARK_CHANGES_ONLY \
+            -e MARK_MINOR_EDIT -e MARK_OUTPUT_FORMAT \
+            "${EXTRA[@]}" \
+            "$MARK_IMAGE" mark publish
